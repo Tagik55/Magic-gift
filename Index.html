@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic Gift 🎁</title>
+<style>
+  body{margin:0;font-family:sans-serif;background:#fef6f9;color:#111;}
+  header{padding:16px;text-align:center;background:#d63384;color:#fff;font-size:24px;font-weight:bold;}
+  main{padding:16px;}
+  .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;}
+  .card{background:#fff;padding:10px;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+  .card img{width:100%;height:100px;object-fit:cover;border-radius:6px;}
+  .card h3{margin:8px 0 4px 0;font-size:16px;}
+  .card p{margin:0 0 8px 0;font-size:14px;color:#666;}
+  .card .price{font-weight:bold;color:#d63384;margin-bottom:8px;}
+  .card button{padding:6px 8px;border:none;border-radius:6px;background:#d63384;color:#fff;cursor:pointer;width:100%;}
+  .cart-panel{position:fixed;top:0;right:0;width:260px;height:100%;background:#fff;padding:16px;box-shadow:-4px 0 10px rgba(0,0,0,0.1);overflow:auto;transform:translateX(100%);transition:0.3s;}
+  .cart-panel.show{transform:translateX(0);}
+  .cart-item{display:flex;justify-content:space-between;margin-bottom:8px;}
+  .cart-item span{font-size:14px;}
+  .cart-btn{position:fixed;top:16px;right:16px;padding:10px 14px;background:#d63384;color:#fff;border:none;border-radius:50%;cursor:pointer;font-weight:bold;}
+  /* Admin login */
+  #loginPanel{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;}
+  #loginPanel form{background:#fff;padding:20px;border-radius:10px;display:flex;flex-direction:column;gap:10px;width:300px;}
+  #loginPanel input{padding:8px;border-radius:6px;border:1px solid #ccc;}
+  #loginPanel button{padding:8px;background:#d63384;color:#fff;border:none;border-radius:6px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div id="loginPanel">
+  <form id="loginForm">
+    <h2>Вход в админку</h2>
+    <input type="text" id="username" placeholder="Логин" required>
+    <input type="password" id="password" placeholder="Пароль" required>
+    <button type="submit">Войти</button>
+  </form>
+</div>
+
+<header>Magic Gift 🎁</header>
+
+<button class="cart-btn" id="cartToggle">🛒</button>
+
+<main>
+  <div class="products" id="products"></div>
+</main>
+
+<div class="cart-panel" id="cartPanel">
+  <h3>Корзина</h3>
+  <div id="cartItems"></div>
+  <p><strong>Итог: <span id="totalPrice">0</span> ֏</strong></p>
+  <button id="checkoutBtn">Оформить заказ</button>
+</div>
+
+<script>
+let products=[
+  {id:1,title:"Набор свечей",desc:"Ароматические свечи для уюта",price:1200,img:"https://picsum.photos/400/300?random=1"},
+  {id:2,title:"Подарочная коробка",desc:"Красиво упакованные сувениры",price:2500,img:"https://picsum.photos/400/300?random=2"},
+  {id:3,title:"Мягкая игрушка",desc:"Плюшевая игрушка для детей",price:1800,img:"https://picsum.photos/400/300?random=3"},
+  {id:4,title:"Чайный набор",desc:"Чай и аксессуары",price:2000,img:"https://picsum.photos/400/300?random=4"},
+  {id:5,title:"Блокнот Magic Gift",desc:"Красивый блокнот для заметок",price:900,img:"https://picsum.photos/400/300?random=5"},
+  {id:6,title:"Подарочный набор сладостей",desc:"Конфеты и шоколад",price:1500,img:"https://picsum.photos/400/300?random=6"}
+];
+
+let cart=[];
+
+const productsEl=document.getElementById('products');
+const cartItemsEl=document.getElementById('cartItems');
+const totalPriceEl=document.getElementById('totalPrice');
+const cartPanel=document.getElementById('cartPanel');
+const cartToggle=document.getElementById('cartToggle');
+
+function renderProducts(){
+  productsEl.innerHTML='';
+  products.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='card';
+    div.innerHTML=`<img src="${p.img}" alt="${p.title}">
+    <h3>${p.title}</h3>
+    <p>${p.desc}</p>
+    <div class="price">${p.price} ֏</div>
+    <button onclick="addToCart(${p.id})">В корзину</button>`;
+    productsEl.appendChild(div);
+  });
+}
+
+function addToCart(id){
+  let p=products.find(pr=>pr.id===id);
+  let c=cart.find(pr=>pr.id===id);
+  if(c){c.qty+=1;}else{cart.push({...p,qty:1});}
+  renderCart();
+}
+
+function renderCart(){
+  cartItemsEl.innerHTML='';
+  let total=0;
+  cart.forEach(item=>{
+    total+=item.price*item.qty;
+    let div=document.createElement('div');
+    div.className='cart-item';
+    div.innerHTML=`<span>${item.title} x${item.qty}</span><span>${item.price*item.qty} ֏</span>`;
+    cartItemsEl.appendChild(div);
+  });
+  totalPriceEl.textContent=total;
+}
+
+cartToggle.addEventListener('click',()=>{cartPanel.classList.toggle('show');});
+
+document.getElementById('checkoutBtn').addEventListener('click',()=>{alert('Заказ оформлен!');cart=[];renderCart();});
+
+// Admin login
+const loginPanel=document.getElementById('loginPanel');
+document.getElementById('loginForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const user=document.getElementById('username').value;
+  const pass=document.getElementById('password').value;
+  if(user==='admin' && pass==='1234'){loginPanel.style.display='none';alert('Добро пожаловать в админку!');}
+  else{alert('Неверный логин или пароль');}
+});
+
+renderProducts();
+</script>
+
+</body>
+</html>
